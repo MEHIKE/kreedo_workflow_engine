@@ -1,0 +1,236 @@
+#!/bin/bash
+
+APP_NAME="{{engine_app_name}}"
+LOG_PATH={{log_folder}}
+PID_FILE={{engine_pid_file}}
+
+TOMCAT_CMD={{engine_tomcat_home}}/bin/catalina.sh
+
+export JAVA_HOME={{java_home}}
+export JAVA_OPTS="{{engine_java_opts}}"
+export CATALINA_OPTS="{{catalina_opts}}"
+
+source {{set_env_coco_sh}}
+
+###############################################################################
+#
+# Function Name : usage()
+# Arguments     : N/A
+# Return Result : N/A, exit 0
+#
+###############################################################################
+usage() 
+{
+  echo ""
+  echo "   Usage:  $0 [-hf]  start|stop|status|pid"
+  echo ""    
+  echo "     -h : usage help"
+  echo "     -f : run in foreground (Ctl-C to stop)"
+  echo ""
+  exit 0
+}
+
+###############################################################################
+#
+# Function Name : start()
+# Arguments     : N/A
+# Return Result : N/A
+#
+###############################################################################
+start()
+{
+  # check if process is alreading running
+  if [ $(pid_status) -eq 0 ]
+  then
+    status
+    exit 0
+  fi
+
+  if [ -n "$OPT_RUN" ] && [ "$OPT_RUN" = "true" ] 
+  then
+    # Start in foreground (Ctl-C to stop) or background depending on OPT_RUN
+    # Echo start options
+    echo "****************************************************"
+    echo "Starting $APP_NAME in foreground (Ctl-C to quit):   "
+    echo "$TOMCAT_CMD run"
+    echo "****************************************************"
+    echo ""
+    exec $TOMCAT_CMD run
+  else
+      echo `date "+%Y/%m/%d %H:%M:%S"`"     INFO [$APP_NAME] Start:" >> $LOG_PATH/$APP_NAME.out
+      echo "Starting $APP_NAME in background:   "
+      echo "$TOMCAT_CMD start"
+      exec $TOMCAT_CMD start >> $LOG_PATH/${APP_NAME}.out 2>&1 &
+      echo "Started $APP_NAME"
+  fi
+	
+}
+
+###############################################################################
+#
+# Function Name : stop()
+# Arguments     : N/A
+# Return Result : N/A
+#
+###############################################################################
+stop()
+{
+  # check that process exists
+  if [ $(pid_status) -ne 0 ]
+  then
+    status
+    exit 0
+  fi
+
+  # Send a kill (with an optional -9 signal) to the process
+  kill $OPT_FORCEKILL `cat $PID_FILE`
+
+  echo "Stopping $APP_NAME - PID [`cat $PID_FILE`]"
+  pid=`cat $PID_FILE`
+  while kill -9 "$pid" >/dev/null 2>&1; do
+            sleep 0.5
+  done
+}
+
+##############################################################################
+#
+# Function Name : status()
+# Arguments     : N/A
+# Return Result : N/A
+#
+###############################################################################
+status()
+{
+
+  STATUS=-1
+  case $(pid_status) in
+    -1) echo "Status: PID file [$PID_FILE] not found !!!"
+        STATUS=-1
+         ;;
+     0) echo "Status: $APP_NAME running - PID [`cat $PID_FILE`]"
+        STATUS=0
+         ;;
+     1) echo "Status: $APP_NAME not running - PID [`cat $PID_FILE`] not found."
+        STATUS=1
+         ;;
+  esac
+
+  return -- $STATUS
+}
+
+
+get_pid()
+{
+  if [ ! -f $PID_FILE ]
+  then
+    echo -1
+  else
+    PID=`cat $PID_FILE`
+    PS_STAT=`ps -p $PID -o'user,pid=' | tail -1 | awk '{print $2}'`
+
+    case "$PS_STAT" in
+      $PID  ) echo $PID
+              ;;
+      *     ) echo 0
+              ;;
+    esac
+  fi
+
+  return 0
+}
+
+###############################################################################
+#
+# Function Name : pid_status()
+# Arguments     : N/A
+# Return Result : -1 - PID file not found (not running),
+#                  0 - PID found (running), 
+#                  1 - PID not found (not running)
+#
+###############################################################################
+pid_status()
+{
+  case $(get_pid) in
+   -1   ) echo -1
+          ;;
+    0   ) echo 1
+          ;;
+    *   ) echo 0
+          ;;
+  esac
+
+  return 0
+}
+
+###############################################################################
+#
+# Function Name : await_application_boot()
+# Arguments     : N/A
+# Return Result : N/A
+#
+###############################################################################
+await_application_boot()
+{
+HTTP_RESPONSE=0
+ATTEMPT=0
+MAX_ATTEMPTS=50
+while [[ $HTTP_RESPONSE -ne 200 && $ATTEMPT -lt $MAX_ATTEMPTS ]]
+do
+  let "ATTEMPT=$ATTEMPT+1"
+  echo "Waiting for application to get ready (attempt $ATTEMPT/$MAX_ATTEMPTS)"
+  sleep 10
+  HTTP_RESPONSE=`curl -s -o /dev/null -I -w "%{http_code}" -m 10 {{engine_application_url}}`
+done
+if [[ $HTTP_RESPONSE -eq 200 ]]
+then
+  echo "Application up and running"
+  exit 0
+else
+  echo "Application start failed"
+  exit 1
+fi
+}
+
+
+# get script options
+while getopts "hf" opt ; do
+  case $opt in
+    h  ) usage
+         exit 0
+         ;;
+    f  ) OPT_RUN=true
+         ;;
+    \? ) usage
+         exit 1
+         ;;
+  esac
+done
+
+
+# correct the index so the command argument is always $1
+shift $(($OPTIND - 1))
+
+case "$1" in
+   start)
+      start
+   ;;
+   stop)
+      stop
+   ;;
+   restart)
+      restart
+   ;;
+   status)
+      status
+      exit $?
+   ;;
+   pid)
+      get_pid
+   ;;
+   await)
+      await_application_boot
+   ;;
+   *)
+      usage
+      exit 1
+esac

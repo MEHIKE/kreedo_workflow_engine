@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration debug="true" scan="true" scanPeriod="10 seconds">
+
+  <property name="logs.dir.resolved" value="${logs.dir:-{{log_folder}}}" />
+  <property name="log.file.resolved" value="${log.file:-kreedo_workflow_engine.log}" />
+  <property name="incassolog.file.resolved" value="${log.file:-kreedo_workflow_incasso.log}" />
+  <property name="log.level.resolved" value="${log.level:-DEBUG}" />
+
+  <appender name="MAIN_SYNC" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${logs.dir.resolved}/${log.file.resolved}</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${logs.dir.resolved}/${log.file.resolved}.%d{yyyy-MM-dd}</fileNamePattern>
+      <maxHistory>${logs.maxhistory:-7}</maxHistory>
+    </rollingPolicy>
+    <encoder>
+      <charset>UTF-8</charset>
+      <pattern>%d{HH:mm:ss.SSS}||%-5level|%logger{40}|%X{workunit}|%msg|%n</pattern>
+    </encoder>
+  </appender>
+
+  <appender name="MAIN" class="ch.qos.logback.classic.AsyncAppender">
+    <appender-ref ref="MAIN_SYNC" />
+    <queueSize>500</queueSize>
+    <discardingThreshold>0</discardingThreshold>
+  </appender>
+
+  <appender name="INCASSO_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <!--file>${logs.dir.resolved}/${incassolog.file.resolved}</file-->
+    <file>{{log_folder}}/incassolog.log</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <!--fileNamePattern>${logs.dir.resolved}/${incassolog.file.resolved}.%d{yyyy-MM-dd}</fileNamePattern-->
+      <fileNamePattern>{{log_folder}}/incassolog.log.%d{yyyy-MM-dd}</fileNamePattern>
+      <maxHistory>${logs.maxhistory:-7}</maxHistory>
+    </rollingPolicy>
+    <encoder>
+      <charset>UTF-8</charset>
+      <pattern>%d{HH:mm:ss.SSS}||%-5level|%logger{40}|%X{workunit}|%msg|%n</pattern>
+    </encoder>
+  </appender>
+
+  <logger name="ee.emt.kreedo.workflow.plugin.IncassoSenderJob" level="INFO">
+    <appender-ref ref="INCASSO_LOG" />
+    <!--appender-ref ref="MAIN" /-->
+  </logger>
+
+  <logger name="ee.telekom.workflow" level="${log.level.resolved}" />
+  <logger name="ee.telekom.workflow.util.StatisticsLoggingAspect" level="INFO" />
+  <logger name="ee.emt.xgate.bo.helper.ParameterizedBoRowMapper" level="INFO" />
+  <logger name="ee.emt" level="DEBUG" />
+  <logger name="ee.homies.gaffer" level="INFO" />
+  <logger name="org.springframework" level="WARN" />
+  <logger name="org.apache.tomcat.jdbc" level="WARN" />
+  <logger name="com.hazelcast" level="INFO" />
+  <logger name="liquibase" level="INFO" />
+
+  <root level="WARN">
+    <appender-ref ref="MAIN" />
+  </root>
+
+</configuration>

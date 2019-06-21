@@ -1,0 +1,35 @@
+---
+  - name: Clean engine tomcat's webapp folder.
+    file: path="{{engine_tomcat_home}}/webapps" state=absent
+
+  - name: Recreate engine tomcat's webapp folder.
+    file: path="{{engine_tomcat_home}}/webapps" state=directory
+
+  - name: Copy engine application war file to webapp folder
+    copy: src={{engine_application_war_source}} dest={{engine_application_war_target}}
+
+  - name:  Copy engine management script file to remote node.
+    template: src={{engine_management_script_template}} dest={{engine_management_script_target}} mode="u=rwx,g=r,o=r"
+
+  - name: Clean router tomcat's webapp folder.
+    file: path="{{router_tomcat_home}}/webapps" state=absent
+
+  - name: Recreate router tomcat's webapp folder.
+    file: path="{{router_tomcat_home}}/webapps" state=directory
+
+  - name: Copy router application war file to webapp folder
+    copy: src={{router_application_war_source}} dest={{router_application_war_target}}
+
+  - name:  Copy router management script file to remote node.
+    template: src={{router_management_script_template}} dest={{router_management_script_target}} mode="u=rwx,g=r,o=r"
+
+  - name: Copy set-env-coco.sh into remote node
+    template: src={{set_env_coco_template}} dest={{set_env_coco_sh}} mode="u=rwx,g=r,o=r" force=no
+
+  - name: Copy wily autoprobe conf into remote node
+    template: src={{wily_autoprobe}} dest={{home_folder}}/ca-apm/autoprobe-agent-9.5/{{wily_autoprobe_file}} mode="u=rw,g=r,o=r"
+    when: is_wily == "yes"
+
+  - name: Copy wily epagent conf into remote node
+    template: src={{wily_epa}} dest={{home_folder}}/ca-apm/ep-agent-9.5/{{wily_epa_file}} mode="u=rw,g=r,o=r"
+    when: is_wily == "yes"

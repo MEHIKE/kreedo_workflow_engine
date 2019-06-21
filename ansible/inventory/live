@@ -1,0 +1,6 @@
+[nodes]
+gillian.estpak.ee ansible_ssh_user=webapp
+willburn.estpak.ee ansible_ssh_user=webapp
+
+[live:children]
+nodes

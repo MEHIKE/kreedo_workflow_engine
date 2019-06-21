@@ -1,0 +1,14 @@
+backup_count: 5
+
+profile: "test"
+profileupper: "TEST"
+
+soa_cert: "soa-dev.crt"
+
+coco_url : "jdbc:oracle:thin:@dtbcis2db.estpak.ee:1521:DTBCIS2"
+coco_password : "xgate"
+
+is_wily : "no"
+engine_introscope_opts : ""
+router_introscope_opts : ""
+

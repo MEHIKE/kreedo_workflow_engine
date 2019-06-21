@@ -1,0 +1,31 @@
+---
+  - name: Ensure that the log directory exists.
+    file: path={{log_folder}} state=directory
+
+  - name: Start the engine application.
+    shell: "cd {{engine_app_folder}} && {{pre_start_script}} nohup ./manage-application.sh start"
+
+  - name: Await the engine application to be ready.
+    shell: "cd {{engine_app_folder}} && ./manage-application.sh await"
+
+  - name: Wait for the engine pid file to get created.
+    wait_for: path={{engine_pid_file}} timeout=240 state=present
+
+  - name: Copy the engine log file to the local machine.
+    fetch: src={{log_folder}}/{{engine_app_name}}.log dest=./{{engine_app_name}}.log flat=true
+
+  - name: Start the router application.
+    shell: "cd {{router_app_folder}} && {{pre_start_script}} nohup ./manage-application.sh start"
+
+  - name: Await the router application to be ready.
+    shell: "cd {{router_app_folder}} && ./manage-application.sh await"
+
+  - name: Wait for the router pid file to get created.
+    wait_for: path={{router_pid_file}} timeout=240 state=present
+
+  - name: Copy the router log file to the local machine.
+    fetch: src={{log_folder}}/{{router_log_file}}.log dest=./{{router_app_name}}.log flat=true
+
+  - name: Print last 50 lines of router log file.
+    shell: "tail -50 {{router_log}}.log"
+

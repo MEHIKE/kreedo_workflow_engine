@@ -1,0 +1,5 @@
+---
+  - include: stop.yml
+  - include: backup.yml
+  - include: update.yml
+  - include: start.yml

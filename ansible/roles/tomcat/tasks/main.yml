@@ -1,0 +1,136 @@
+## setup tomcat: download, unarchive, configure
+
+- name: Check if engine tomcat folder exists.
+  stat: path={{engine_tomcat_home}}
+  register: engine_tomcat_home_check
+
+- name: Log if engine tomcat folder exists.
+  debug: msg="Engine Tomcat folder {{engine_tomcat_home}} exist, skipping tomcat tasks"
+  when: engine_tomcat_home_check.stat.exists
+
+- name: Log if engine tomcat folder does not exist.
+  debug: msg="Engine Tomcat folder {{engine_tomcat_home}} does not exist, downloading from {{tomcat_url}}"
+  when: not engine_tomcat_home_check.stat.exists
+
+- name: Download engine tomcat.
+  get_url: url={{tomcat_url}} dest={{tmp_folder}}/
+  register: engine_downloaded_tomcat_archive
+  when: not engine_tomcat_home_check.stat.exists
+
+- name: Get root folder name inside engine archive.
+  shell: /usr/bin/unzip -Z1 {{engine_downloaded_tomcat_archive.dest}} | /usr/bin/head -1
+  register: engine_tomcat_folder_name
+  when: not engine_tomcat_home_check.stat.exists
+
+- name: Unarchive engine tomcat.
+  unarchive: src={{engine_downloaded_tomcat_archive.dest}} dest={{tmp_folder}}/ copy=no
+  register: engine_unarhive_tomcat
+  when: not engine_tomcat_home_check.stat.exists
+
+- name: Create engine tomcat folder.
+  file: path={{engine_tomcat_home}} state=directory
+  when: not engine_tomcat_home_check.stat.exists
+
+- name: Move unpacked archive to engine tomcat folder.
+  shell: mv {{tmp_folder}}/{{engine_tomcat_folder_name.stdout}}/* {{engine_tomcat_home}}/
+  when: not engine_tomcat_home_check.stat.exists
+
+- name:  Configure engine tomcat with custom setenv.sh.
+  template: src=engine-setenv.sh.j2 dest={{engine_tomcat_home}}/bin/setenv.sh
+
+- name:  Configure engine tomcat with custom shutdown.sh.
+  template: src=shutdown.sh.j2 dest={{engine_tomcat_home}}/bin/shutdown.sh
+
+- name: Make engine tomcat skripts executable.
+  shell: chmod +x {{engine_tomcat_home}}/bin/*.sh
+  when: not engine_tomcat_home_check.stat.exists
+
+- name:  Configure engine tomcat with custom server.xml.
+  template: src=engine-server.xml.j2 dest={{engine_tomcat_home}}/conf/server.xml
+
+- name:  Configure engine tomcat lib with adding custom BRTMFilter.jar.
+  copy: src=BRTMFilter.jar.j2 dest={{engine_tomcat_home}}/lib/BRTMFilter.jar mode="u=rwx,g=r,o=r" force=no
+
+- name:  Configure engine emt.policy with custom policy.
+  template: src=emt.policy.j2 dest={{engine_conf_folder}}/emt.policy mode="u=rwx,g=r,o=r" force=no
+
+- name:  Configure engine context.xml with custom fail.
+  template: src=context.xml.j2 dest={{engine_conf_folder}}/context.xml mode="u=rwx,g=r,o=r" force=no
+
+- name: Remove empty engine folder.
+  file: path={{tmp_folder}}/{{engine_tomcat_folder_name.stdout}} state=absent
+  when: not engine_tomcat_home_check.stat.exists
+
+- name: Remove engine downloaded archive.
+  file: path={{engine_downloaded_tomcat_archive.dest}} state=absent
+  when: not engine_tomcat_home_check.stat.exists
+
+
+- name: Check if router tomcat folder exists.
+  stat: path={{router_tomcat_home}}
+  register: router_tomcat_home_check
+
+- name: Log if router tomcat folder exists.
+  debug: msg="Router Tomcat folder {{router_tomcat_home}} exist, skipping tomcat tasks"
+  when: router_tomcat_home_check.stat.exists
+
+- name: Log if router tomcat folder does not exist.
+  debug: msg="Router Tomcat folder {{router_tomcat_home}} does not exist, downloading from {{tomcat_url}}"
+  when: not router_tomcat_home_check.stat.exists
+
+- name: Download router tomcat.
+  get_url: url={{tomcat_url}} dest={{tmp_folder}}/
+  register: router_downloaded_tomcat_archive
+  when: not router_tomcat_home_check.stat.exists
+
+- name: Get root folder name inside router archive.
+  shell: /usr/bin/unzip -Z1 {{router_downloaded_tomcat_archive.dest}} | /usr/bin/head -1
+  register: router_tomcat_folder_name
+  when: not router_tomcat_home_check.stat.exists
+
+- name: Unarchive router tomcat.
+  unarchive: src={{router_downloaded_tomcat_archive.dest}} dest={{tmp_folder}}/ copy=no
+  register: router_unarhive_tomcat
+  when: not router_tomcat_home_check.stat.exists
+
+- name: Create router tomcat folder.
+  file: path={{router_tomcat_home}} state=directory
+  when: not router_tomcat_home_check.stat.exists
+
+- name: Move unpacked archive to router tomcat folder.
+  shell: mv {{tmp_folder}}/{{router_tomcat_folder_name.stdout}}/* {{router_tomcat_home}}/
+  when: not router_tomcat_home_check.stat.exists
+
+- name:  Configure router tomcat with custom setenv.sh.
+  template: src=router-setenv.sh.j2 dest={{router_tomcat_home}}/bin/setenv.sh
+
+- name:  Configure router tomcat with custom shutdown.sh.
+  template: src=shutdown.sh.j2 dest={{router_tomcat_home}}/bin/shutdown.sh
+
+- name: Make router tomcat skripts executable.
+  shell: chmod +x {{router_tomcat_home}}/bin/*.sh
+  when: not router_tomcat_home_check.stat.exists
+
+- name:  Configure router tomcat with custom server.xml.
+  template: src=router-server.xml.j2 dest={{router_tomcat_home}}/conf/server.xml
+
+- name:  Configure router tomcat lib with adding custom BRTMFilter.jar.
+  copy: src=BRTMFilter.jar.j2 dest={{router_tomcat_home}}/lib/BRTMFilter.jar mode="u=rwx,g=r,o=r" force=no
+
+- name:  Configure logback conf with custom logback.xml.
+  template: src=logback.xml.j2 dest={{logback_folder}}/logback.xml mode="u=rwx,g=r,o=r" force=no
+
+- name:  Configure router emt.policy with custom policy.
+  template: src=emt.policy.j2 dest={{router_conf_folder}}/emt.policy mode="u=rwx,g=r,o=r" force=no
+
+- name:  Configure router context.xml with custom fail.
+  template: src=context.xml.j2 dest={{router_conf_folder}}/context.xml mode="u=rwx,g=r,o=r" force=no
+
+- name: Remove empty router folder.
+  file: path={{tmp_folder}}/{{router_tomcat_folder_name.stdout}} state=absent
+  when: not router_tomcat_home_check.stat.exists
+
+- name: Remove router downloaded archive.
+  file: path={{router_downloaded_tomcat_archive.dest}} state=absent
+  when: not router_tomcat_home_check.stat.exists
+

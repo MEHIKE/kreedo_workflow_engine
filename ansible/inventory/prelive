@@ -1,0 +1,6 @@
+[nodes]
+kate.estpak.ee ansible_ssh_user=webapp
+william.estpak.ee ansible_ssh_user=webapp
+
+[prelive:children]
+nodes

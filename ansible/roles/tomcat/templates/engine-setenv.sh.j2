@@ -1,0 +1,43 @@
+#!/bin/sh
+
+export JAVA_HOME="{{java_home}}"
+
+if [ "$SHUTDOWN" != "true" ]
+then
+
+    pos=$(hostname | grep -b -o ".estpak.ee" | cut -d: -f1)
+    host=$(hostname)
+    shortname=${host:0:pos}
+    echo "shortname=$shortname, longname=$host"
+
+        export CATALINA_PID={{engine_pid_file}}
+        export CATALINA_OPTS="{{catalina_opts}}"
+        export ENGINE_CATALINA_OPTS="{{engine_catalina_opts}}"
+        #export NODE="ccm2-ccmapp"
+        export NODE="$shortname-kreedo_workflow_engine"
+        #export COCO_JDBC_URL="{{coco_url}}"
+        #export COCO_JDBC_USERNAME="{{coco_username}}"
+        #export COCO_JDBC_PASSWORD="{{coco_password}}"
+        source /opt/app/webapp/set-env-coco.sh
+
+        export GCLOG="{{router_gc_log_opts}}"
+        export VARIA="{{varia_opts}}"
+
+        #export JAVA_OPTS="-server -Djava.awt.headless=true -XX:-UseSplitVerifier -XX:NewRatio=2 -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:+CMSParallelRemarkEnabled -XX:SurvivorRatio=6 -XX:+DisableExplicitGC -XX:+HeapDumpOnOutOfMemoryError -XX:+CMSClassUnloadingEnabled -XX:+UseNUMA -d64 -XX:+AlwaysActAsServerClassMachine -XX:+AggressiveOpts -XX:+BackgroundCompilation -XX:+AlwaysPreTouch -XX:+ParallelRefProcEnabled -XX:+CMSIncrementalMode -XX:+CMSIncrementalPacing -XX:+UseCompressedOops -XX:ReservedCodeCacheSize=64m -XX:InitialCodeCacheSize=64m -XX:LargePageSizeInBytes=64m -XX:+UseLargePages -XX:-DontCompileHugeMethods -XX:+UseTLAB -Xss512k -XX:+CMSPermGenSweepingEnabled -XX:+UseFastAccessorMethods -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=68 -XX:+PrintTenuringDistribution -verbose:gc -XX:GCHeapFreeLimit=5 -XX:GCTimeLimit=90 -XX:+UseStringCache -XX:+OptimizeStringConcat -XX:+AggressiveOpts -XX:+UnlockDiagnosticVMOptions -XX:ParGCCardsPerStrideChunk=4096 -XX:InitialTenuringThreshold=9 -XX:MaxTenuringThreshold=9 -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+PrintReferenceGC -Xmx5356m -Xms5356m -XX:PermSize=256m -XX:MaxPermSize=256m"
+        #export JAVA_OPTS="export JAVA_OPTS="
+        export JAVA_OPTS="{{engine_java_opts}}"
+    export INTROSCOPE_OPTS="{{engine_introscope_opts}}"
+
+    export JAVA_OPTS="$JAVA_OPTS -Dlogback.configurationFile={{logback_folder}}/logback.xml -Xloggc:{{log_folder}}/gc-{{engine_app_name}}.log -Dlogs.dir={{log_folder}} -Dlogs.maxhistory=360 -Dlog.level=INFO -Dlog.file=kreedo_workflow_engine.log -Dlog.app_name=APP-EMT-KREEDOWORKFLOW-{{profileupper}}"
+
+        # CA APM Autoprobe (Wily)
+          #export JAVA_OPTS="$JAVA_OPTS -javaagent:/opt/app/webapp/ca-apm/autoprobe-agent-9.5/Agent.jar -Dcom.wily.introscope.agentProfile=/opt/app/webapp/ca-apm/autoprobe-agent-9.5/EMT-CCM-IntroscopeAgent.profile -Dcom.wily.introscope.agent.agentName={{profile}}-ccmapp-tomcat"
+
+    export PLUMBR="-javaagent:/opt/app/webapp/plumbr/workflow/plumbr.jar"
+    export JAVA_OPTS="$JAVA_OPTS $INTROSCOPE_OPTS $PLUMBR"
+else
+        # When shutting down pass PID var only if it exists (to support restart when server is not running)
+        if [ -s "/opt/app/webapp/ccmapp/ccmapp.pid" ]; then
+                export CATALINA_PID=/opt/app/webapp/ccm/ccm.pid
+        fi
+fi

@@ -1,0 +1,16 @@
+---
+  - name: Check if the engine application management script exists
+    stat: path={{engine_management_script_target}}
+    register: engine_management_script_target_check
+
+  - name: Stop the engine application.
+    shell: "cd {{engine_app_folder}} && ./{{management_script}} stop"
+    when: engine_management_script_target_check.stat.exists
+
+  - name: Check if the router application management script exists
+    stat: path={{router_management_script_target}}
+    register: router_management_script_target_check
+
+  - name: Stop the router application.
+    shell: "cd {{router_app_folder}} && ./{{management_script}} stop"
+    when: router_management_script_target_check.stat.exists

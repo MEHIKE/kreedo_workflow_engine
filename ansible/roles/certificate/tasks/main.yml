@@ -1,0 +1,29 @@
+## Install Eesti Telekom Root CA certificate to JVM truststore
+
+- name: Copy soa certificate file to node.
+  copy: src={{soa_cert}} dest="{{tmp_folder}}/{{soa_cert}}"
+
+- name: Copy soa certificate file to node.
+  copy: src=et-root-cert.cer dest="{{tmp_folder}}/et-root-cert.cer"
+
+- name: Remove the soa certificate.
+  shell: "{{java_home}}/bin/keytool -delete -noprompt -alias soa -keystore {{java_home}}/lib/security/cacerts -storepass changeit"
+  ignore_errors: yes
+
+- name: Remove the root certificate.
+  shell: "{{java_home}}/bin/keytool -delete -noprompt -alias root -keystore {{java_home}}/lib/security/cacerts -storepass changeit"
+  ignore_errors: yes
+
+- name: Install the soa certificate.
+  shell: "{{java_home}}/bin/keytool -import -alias soa -keystore {{java_home}}/lib/security/cacerts -file {{tmp_folder}}/{{soa_cert}} -storepass changeit -noprompt"
+  ignore_errors: yes
+
+- name: Install the root certificate.
+  shell: "{{java_home}}/bin/keytool -import -alias root -keystore {{java_home}}/lib/security/cacerts -file {{tmp_folder}}/et-root-cert.cer -storepass changeit -noprompt"
+  ignore_errors: yes
+
+- name: Remove soa certificate file.
+  file: path="{{tmp_folder}}/{{soa_cert}}" state=absent
+
+- name: Remove root certificate file.
+  file: path="{{tmp_folder}}/et-root-cert.cer" state=absent

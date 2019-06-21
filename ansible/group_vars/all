@@ -1,0 +1,101 @@
+engine_app_name : "kreedo-workflow-engine"
+router_app_name : "kreedo-message-router"
+
+profile: ""
+profileupper: ""
+
+home_folder : "/opt/app/webapp"
+logback_folder : "{{home_folder}}/run"
+tmp_folder : "/tmp"
+log_folder : "{{home_folder}}/log"
+engine_log_file : "kreedo_workflow_engine"
+router_log_file : "kreedo_message_router"
+engine_log : "{{log_folder}}/{{engine_log_file}}"
+router_log : "{{log_folder}}/{{router_log_file}}"
+engine_app_folder : "{{home_folder}}/{{engine_app_name}}"
+router_app_folder : "{{home_folder}}/{{router_app_name}}"
+engine_tomcat_home : "{{engine_app_folder}}/tomcat"
+router_tomcat_home : "{{router_app_folder}}/tomcat"
+engine_conf_folder : "{{engine_tomcat_home}}/conf"
+router_conf_folder : "{{router_tomcat_home}}/conf"
+engine_backup_folder: "{{engine_app_folder}}/backup"
+router_backup_folder: "{{router_app_folder}}/backup"
+
+wily_autoprobe : "EMT-Credo-Live-IntroscopeAgent.profile.j2"
+wily_epa : "LiveIntroscopeEPAgent.properties.j2"
+wily_autoprobe_file : "IntroscopeAgent.profile"
+wily_epa_file : "IntroscopeEPAgent.properties"
+is_wily : "yes"
+
+soa_cert: ""
+
+engine_application_war: "{{engine_app_name}}.war"
+router_application_war: "{{router_app_name}}.war"
+#application_war_source: "../build/{{application_war}}"
+engine_application_war_source: "../{{engine_app_name}}/{{engine_application_war}}"
+router_application_war_source: "../{{router_app_name}}/{{router_application_war}}"
+engine_application_war_target: "{{engine_tomcat_home}}/webapps/{{engine_application_war}}"
+router_application_war_target: "{{router_tomcat_home}}/webapps/{{router_application_war}}"
+
+management_script: "manage-application.sh"
+engine_management_script: "engine-manage-application.sh"
+router_management_script: "router-manage-application.sh"
+engine_management_script_template: "{{engine_management_script}}.j2"
+router_management_script_template: "{{router_management_script}}.j2"
+engine_management_script_target: "{{engine_app_folder}}/{{management_script}}"
+router_management_script_target: "{{router_app_folder}}/{{management_script}}"
+
+context_xml : "context.xml"
+shutdown_sh : "shutdown.sh"
+browser_jsp : "Browser.jsp"
+
+set_env_coco_template: "set-env-coco.sh.j2"
+set_env_coco_sh: "{{home_folder}}/set-env-coco.sh"
+
+coco_url : "jdbc:oracle:thin:@tbcisdb.estpak.ee:1521:TBCIS"
+coco_username : "xgate"
+coco_password : ""
+
+engine_pid_file: "{{engine_app_folder}}/application.pid"
+router_pid_file: "{{router_app_folder}}/application.pid"
+
+#tomcat_url : "http://sorts.emt.ee/artifactory/ext-release-local/org/apache/tomcat/tomcat/7.0.42/tomcat-7.0.42.zip"
+tomcat_url : "https://patton.estpak.ee/artifactory/ext-release-local/org/apache/tomcat/8.0.12/tomcat-8.0.12.zip"
+engine_tomcat_port_shutdown: 8006
+router_tomcat_port_shutdown: 8005
+engine_tomcat_port_http: 8081
+router_tomcat_port_http: 8080
+engine_tomcat_port_https: 8443
+router_tomcat_port_https: 8443
+engine_tomcat_port_ajp: 8009
+router_tomcat_port_ajp: 8009
+
+#java_version : "7u79"
+#java_url : "http://sorts.emt.ee/artifactory/ext-release-local/com/oracle/java/jdk/{{java_version}}-linux-x64/jdk-{{java_version}}-linux-x64.gz"
+#java_home: "{{home_folder}}/run/jdk-{{java_version}}"
+java_version : "1.7.0_79"
+java_url : "http://patton.estpak.ee/artifactory/ext-release-local/com/openjdk/openjdk-{{java_version}}.tar.gz"
+java_home: "{{home_folder}}/run/openjdk-{{java_version}}"
+java_tmp_folder: "{{tmp_folder}}/openjdk-{{java_version}}"
+
+introscope_opts : ""
+plumbr_opts : ""
+engine_catalina_opts : "-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9999 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false"
+router_catalina_opts : "-Dcom.sun.management.jmxremote"
+engine_node : "credo1-kreedo_workflow_engine"
+router_node : "credo2-kreedo_message_router"
+engine_gc_log_opts : "-verbose:gc -XX:+PrintTenuringDistribution -Xloggc:/opt/app/webapp/log/gc_kreedo_workflow_engine.log -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -XX:+PrintGCDetails"
+router_gc_log_opts : "-verbose:gc -XX:+PrintTenuringDistribution -Xloggc:/opt/app/webapp/log/gc_kreedo_message_router.log -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -XX:+PrintGCDetails"
+varia_opts: "-Djava.security.policy=$CATALINA_HOME/conf/emt.policy -Duser.timezone=Europe/Tallinn -Duser.language=en -Duser.country=US"
+#memory_opts : "-Xms1024m -Xmx1024m -XX:PermSize=256m -XX:MaxPermSize=256m -XX:NewSize=512m -XX:MaxNewSize=512m"
+#java_opts : "{{plumbr_opts}} -server {{memory_opts}} {{varia_opts}} -Djava.awt.headless=true -XX:-UseSplitVerifier -Dsun.io.serialization.extendedDebugInfo=true -XX:+HeapDumpOnOutOfMemoryError -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:+CMSParallelRemarkEnabled -XX:SurvivorRatio=6 -XX:+DisableExplicitGC -XX:+CMSClassUnloadingEnabled -XX:+UseNUMA -d64 -XX:+AlwaysActAsServerClassMachine -XX:+AggressiveOpts -XX:+BackgroundCompilation -XX:+AlwaysPreTouch -XX:+ParallelRefProcEnabled -XX:+CMSIncrementalMode -XX:+CMSIncrementalPacing -XX:+UseCompressedOops -XX:MaxTenuringThreshold=9 -XX:GCHeapFreeLimit=5 -XX:GCTimeLimit=90 "
+engine_java_opts : " {{engine_gc_log_opts}} -Dlogs.dir=/opt/app/webapp/log -Dlogs.maxhistory=360 -Dlog.level=INFO -Dlog.file=kreedo_workflow_engine.log -Djava.awt.headless=true -server -XX:-UseSplitVerifier -Xms2048m -Xmx2048m -XX:PermSize=256m -XX:MaxPermSize=256m -XX:NewSize=512m -XX:MaxNewSize=512m -Dlogback.configurationFile={{logback_folder}}/logback.xml -Dserver.tomcat.max-http-header-size=16384 -Dsun.io.serialization.extendedDebugInfo=true -XX:+HeapDumpOnOutOfMemoryError -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:+CMSParallelRemarkEnabled -XX:SurvivorRatio=6 -XX:+DisableExplicitGC -XX:+CMSClassUnloadingEnabled -XX:+UseNUMA -d64 -XX:+AlwaysActAsServerClassMachine -XX:+AggressiveOpts -XX:+BackgroundCompilation -XX:+AlwaysPreTouch -XX:+ParallelRefProcEnabled -XX:+CMSIncrementalMode -XX:+CMSIncrementalPacing -XX:+UseCompressedOops -XX:MaxTenuringThreshold=9 -XX:GCHeapFreeLimit=5 -XX:GCTimeLimit=90 $GCLOG $VARIA"
+router_java_opts : " {{router_gc_log_opts}} -Dlogs.dir=/opt/app/webapp/log -Dlogs.maxhistory=360 -Dlog.level=INFO -Dlog.file=kreedo_message_router.log -Djava.awt.headless=true -server -XX:-UseSplitVerifier -Xms1536m -Xmx1536m -XX:PermSize=192m -XX:MaxPermSize=192m -XX:NewSize=384m -XX:MaxNewSize=384m -Dlogback.configurationFile=/opt/app/webapp/run/logback.xml -Dserver.tomcat.max-http-header-size=16384 -Dsun.io.serialization.extendedDebugInfo=true -XX:+HeapDumpOnOutOfMemoryError -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:+CMSParallelRemarkEnabled -XX:SurvivorRatio=6 -XX:+DisableExplicitGC -XX:+CMSClassUnloadingEnabled -XX:+UseNUMA -d64 -XX:+AlwaysActAsServerClassMachine -XX:+AggressiveOpts -XX:+BackgroundCompilation -XX:+AlwaysPreTouch -XX:+ParallelRefProcEnabled -XX:+CMSIncrementalMode -XX:+CMSIncrementalPacing -XX:+UseCompressedOops -XX:MaxTenuringThreshold=9 -XX:GCHeapFreeLimit=5 -XX:GCTimeLimit=90 $GCLOG $VARIA"
+catalina_opts: "-Dserver.tomcat.max-http-header-size=16384 -Duser.country=en -Duser.language=en -Duser.variant= -Duser.region=us -Dlogs.dir={{log_folder}}"
+
+pre_start_script : ""
+
+backup_count: 0
+
+engine_application_url : "http://localhost:{{engine_tomcat_port_http}}/{{engine_app_name}}/login"
+router_application_url : "http://localhost:{{router_tomcat_port_http}}/{{router_app_name}}"

@@ -1,0 +1,64 @@
+---
+  - name: Check if there is an engine application war file to be backed up.
+    stat: path={{engine_application_war_target}}
+    register: engine_application_war_target_check
+    when: backup_count > 0
+
+  - name: Check if there is a engine management script file to be backed up.
+    stat: path={{engine_management_script_target}}
+    register: engine_management_script_target_check
+    when: backup_count > 0
+
+  - name: Create a new engine backup directory.
+    file: path={{engine_backup_folder}}/{{engine_app_name}}.{{ ansible_date_time.iso8601 }} state=directory
+    register: engine_current_backup_folder
+    when: backup_count > 0 and (engine_application_war_target_check.stat.exists or engine_management_script_target_check.stat.exists)
+
+  - name: Backup engine application war file.
+    command: cp {{engine_application_war_target}} {{engine_current_backup_folder.path}}
+    when: backup_count > 0 and engine_application_war_target_check.stat.exists
+
+  - name: Backup engine management script file.
+    command: cp {{engine_management_script_target}} {{engine_current_backup_folder.path}}
+    when: backup_count > 0 and engine_management_script_target_check.stat.exists
+
+  - name: Create list of engine expired backups.
+    shell: " ls -t {{engine_backup_folder}} | grep {{engine_app_name}} | tail -n +{{ backup_count + 1 }}"
+    changed_when : False
+    register     : engine_expired_backups
+
+  - name: Delete engine expired backups.
+    file: path="{{engine_backup_folder}}/{{item}}" state=absent force=true
+    with_items: "{{engine_expired_backups.stdout_lines}}"
+
+  - name: Check if there is an router application war file to be backed up.
+    stat: path={{router_application_war_target}}
+    register: router_application_war_target_check
+    when: backup_count > 0
+
+  - name: Check if there is a router management script file to be backed up.
+    stat: path={{router_management_script_target}}
+    register: router_management_script_target_check
+    when: backup_count > 0
+
+  - name: Create a new router backup directory.
+    file: path={{router_backup_folder}}/{{router_app_name}}.{{ ansible_date_time.iso8601 }} state=directory
+    register: router_current_backup_folder
+    when: backup_count > 0 and (router_application_war_target_check.stat.exists or router_management_script_target_check.stat.exists)
+
+  - name: Backup router application war file.
+    command: cp {{router_application_war_target}} {{router_current_backup_folder.path}}
+    when: backup_count > 0 and router_application_war_target_check.stat.exists
+
+  - name: Backup router management script file.
+    command: cp {{router_management_script_target}} {{router_current_backup_folder.path}}
+    when: backup_count > 0 and router_management_script_target_check.stat.exists
+
+  - name: Create list of router expired backups.
+    shell: " ls -t {{router_backup_folder}} | grep {{router_app_name}} | tail -n +{{ backup_count + 1 }}"
+    changed_when : False
+    register     : router_expired_backups
+
+  - name: Delete router expired backups.
+    file: path="{{router_backup_folder}}/{{item}}" state=absent force=true
+    with_items: "{{router_expired_backups.stdout_lines}}"

@@ -1,0 +1,6 @@
+[nodes]
+isla.estpak.ee ansible_ssh_user=webapp
+charles.estpak.ee ansible_ssh_user=webapp
+
+[test:children]
+nodes

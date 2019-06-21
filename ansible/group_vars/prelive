@@ -1,0 +1,21 @@
+backup_count: 5
+
+home_folder : "/opt/app/webapp"
+log_folder : "{{home_folder}}/log"
+
+profile: "prelive"
+profileupper: "PRELIVE"
+
+soa_cert: "soa-test.crt"
+
+engine_introscope_opts : "-javaagent:/opt/app/webapp/ca-apm/autoprobe-agent-9.5/Agent.jar -Dcom.wily.introscope.agentProfile=/opt/app/webapp/ca-apm/autoprobe-agent-9.5/{{wily_autoprobe_file}} -Dcom.wily.introscope.agent.agentName=prelive-kreedo_workflow_engine-tomcat"
+router_introscope_opts : "-javaagent:/opt/app/webapp/ca-apm/autoprobe-agent-9.5/Agent.jar -Dcom.wily.introscope.agentProfile=/opt/app/webapp/ca-apm/autoprobe-agent-9.5/{{wily_autoprobe_file}} -Dcom.wily.introscope.agent.agentName=prelive-kreedo_message_router-tomcat"
+
+is_wily : "yes"
+wily_autoprobe : "EMT-Credo-PreLive-IntroscopeAgent.profile.j2"
+wily_epa : "PreliveIntroscopeEPAgent.properties.j2"
+
+#plumbr_opts : "-javaagent:/opt/app/webapp/plumbr/plumbr-web/plumbr.jar"
+
+coco_url : "jdbc:oracle:thin:@ttbcisdb.estpak.ee:1521:TTBCIS"
+coco_password : "xgate"

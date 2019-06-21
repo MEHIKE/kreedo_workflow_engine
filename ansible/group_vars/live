@@ -1,0 +1,15 @@
+backup_count: 5
+
+profile: "live"
+profileupper: "LIVE"
+
+is_wily : "yes"
+soa_cert: "soa-live.crt"
+
+home_folder : "/opt/app/webapp"
+log_folder : "{{home_folder}}/log"
+
+engine_introscope_opts : "-javaagent:/opt/app/webapp/ca-apm/autoprobe-agent-9.5/Agent.jar -Dcom.wily.introscope.agentProfile=/opt/app/webapp/ca-apm/autoprobe-agent-9.5/EMT-Credo-Live-IntroscopeAgent.profile -Dcom.wily.introscope.agent.agentName=live-kreedo_workflow_engine-tomcat"
+router_introscope_opts : "-javaagent:/opt/app/webapp/ca-apm/autoprobe-agent-9.5/Agent.jar -Dcom.wily.introscope.agentProfile=/opt/app/webapp/ca-apm/autoprobe-agent-9.5/EMT-Credo-Live-IntroscopeAgent.profile -Dcom.wily.introscope.agent.agentName=live-kreedo_message_router-tomcat"
+
+
